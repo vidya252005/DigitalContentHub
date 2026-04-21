@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${playlist.name} + ' – ContentHub'">Playlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/playlist}">← My Library</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="playlist-header">
+        <div>
+            <h1 th:text="${playlist.name}">Playlist</h1>
+            <p th:text="${playlist.description}">Description</p>
+            <span th:text="${playlist.isPublic() ? '🌍 Public Playlist' : '🔒 Private Playlist'}">Visibility</span>
+            &nbsp;·&nbsp; By <strong th:text="${playlist.owner.username}">owner</strong>
+            &nbsp;·&nbsp; <span th:text="${#lists.size(playlist.contentItems)} + ' items'">0 items</span>
+        </div>
+    </div>
+
+    <!-- Content in playlist -->
+    <h2>Content</h2>
+    <div class="content-list" th:if="${not #lists.isEmpty(playlist.contentItems)}">
+        <div class="list-item" th:each="item : ${playlist.contentItems}">
+            <div class="list-item-icon">
+                <span th:switch="${item.contentType.name()}">
+                    <span th:case="'MOVIE'">🎬</span>
+                    <span th:case="'MUSIC'">🎵</span>
+                    <span th:case="'EBOOK'">📖</span>
+                </span>
+            </div>
+            <div class="list-item-info">
+                <strong th:text="${item.title}">Title</strong>
+                <span th:text="${item.genre} + ' · ' + ${item.creator}">Genre · Creator</span>
+            </div>
+            <div class="list-item-actions">
+                <a th:href="@{/content/{id}/stream(id=${item.id})}" class="btn-primary">▶ Play</a>
+                <form th:if="${isOwner}"
+                      th:action="@{/playlist/{pid}/remove/{cid}(pid=${playlist.id},cid=${item.id})}"
+                      method="post" style="display:inline">
+                    <button type="submit" class="btn-danger">Remove</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div th:if="${#lists.isEmpty(playlist.contentItems)}" class="empty-state">
+        <p>This playlist is empty. Add content from the catalog!</p>
+    </div>
+
+    <!-- Add content (owner only) -->
+    <div th:if="${isOwner}" class="add-to-playlist">
+        <h3>Add Content to Playlist</h3>
+        <div class="content-list">
+            <div class="list-item" th:each="item : ${allContent}">
+                <div class="list-item-icon">
+                    <span th:switch="${item.contentType.name()}">
+                        <span th:case="'MOVIE'">🎬</span>
+                        <span th:case="'MUSIC'">🎵</span>
+                        <span th:case="'EBOOK'">📖</span>
+                    </span>
+                </div>
+                <div class="list-item-info">
+                    <strong th:text="${item.title}">Title</strong>
+                    <span th:text="${item.contentType} + ' · ' + ${item.genre}">Type</span>
+                </div>
+                <form th:action="@{/playlist/{pid}/add/{cid}(pid=${playlist.id},cid=${item.id})}"
+                      method="post">
+                    <button type="submit" class="btn-secondary">+ Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

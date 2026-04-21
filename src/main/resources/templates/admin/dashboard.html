@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Admin Dashboard – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/admin}">🎬 ContentHub Admin</a></div>
+    <div class="nav-links">
+        <a th:href="@{/admin}" class="active">Dashboard</a>
+        <a th:href="@{/admin/content}">Content</a>
+        <a th:href="@{/admin/subscriptions}">Subscriptions</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <h1>Admin Dashboard</h1>
+    <p class="page-sub">Platform overview &amp; management</p>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" th:text="${stats.totalUsers}">0</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-value" th:text="${stats.activeSubscriptions}">0</div>
+            <div class="stat-label">Active Subscriptions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎬</div>
+            <div class="stat-value" th:text="${stats.totalContent}">0</div>
+            <div class="stat-label">Total Content</div>
+        </div>
+        <div class="stat-card stat-card-revenue">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value">₹<span th:text="${#numbers.formatDecimal(stats.totalRevenue * 83, 1, 'COMMA', 0, 'POINT')}">0</span></div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+
+    <div class="breakdown-row">
+        <div class="breakdown-card">
+            <h3>Content by Plan Tier</h3>
+            <div class="breakdown-item">
+                <span>🆓 Free</span><strong th:text="${stats.freeContent}">0</strong>
+            </div>
+            <div class="breakdown-item">
+                <span>⭐ Monthly+</span><strong th:text="${stats.monthlyContent}">0</strong>
+            </div>
+            <div class="breakdown-item">
+                <span>💎 Yearly Only</span><strong th:text="${stats.yearlyContent}">0</strong>
+            </div>
+        </div>
+        <div class="breakdown-card">
+            <h3>Users by Role</h3>
+            <div class="breakdown-item">
+                <span>Subscribers</span><strong th:text="${stats.totalSubscribers}">0</strong>
+            </div>
+            <div class="breakdown-item">
+                <span>Curators</span><strong th:text="${stats.totalCurators}">0</strong>
+            </div>
+        </div>
+        <div class="breakdown-card">
+            <h3>Plans</h3>
+            <div class="breakdown-item">
+                <span>Monthly</span><strong th:text="${stats.monthlySubscriptions}">0</strong>
+            </div>
+            <div class="breakdown-item">
+                <span>Yearly</span><strong th:text="${stats.yearlySubscriptions}">0</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-quick-links">
+        <a th:href="@{/admin/content}"        class="btn-primary">Manage Content</a>
+        <a th:href="@{/admin/content/upload}" class="btn-primary">+ Upload Content</a>
+        <a th:href="@{/admin/subscriptions}"  class="btn-secondary">Subscriptions</a>
+    </div>
+</div>
+</body>
+</html>

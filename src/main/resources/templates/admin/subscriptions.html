@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Subscriptions – ContentHub Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/admin}">Admin Dashboard</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <h1>All Subscriptions</h1>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>User</th><th>Plan</th><th>Start</th>
+                <th>Expiry</th><th>Price</th><th>Payment</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="sub : ${subscriptions}">
+                <td th:text="${sub.id}">1</td>
+                <td th:text="${sub.user.username}">user</td>
+                <td th:text="${sub.planType}">MONTHLY</td>
+                <td th:text="${sub.startDate}">Date</td>
+                <td th:text="${sub.endDate}">Date</td>
+                <td th:text="'₹' + ${#numbers.formatDecimal(sub.price, 1, 'COMMA', 0, 'POINT')}">₹830</td>
+                <td th:text="${sub.paymentStatus}">PAID</td>
+                <td>
+                    <span th:text="${sub.valid ? 'Active' : 'Expired'}"
+                          th:class="${sub.valid ? 'badge badge-active' : 'badge badge-expired'}">Status</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

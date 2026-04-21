@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Library – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">Catalog</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="page-header-row">
+        <h1>My Library</h1>
+        <!-- Create playlist form -->
+        <button class="btn-primary" onclick="document.getElementById('createModal').style.display='flex'">
+            + New Playlist
+        </button>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div id="createModal" class="modal" style="display:none">
+        <div class="modal-card">
+            <h3>Create New Playlist</h3>
+            <form th:action="@{/playlist/create}" method="post">
+                <div class="form-group">
+                    <label>Playlist Name *</label>
+                    <input type="text" name="name" placeholder="e.g. Study Music" required/>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" placeholder="Optional description"/>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label><input type="checkbox" name="isPublic"/> Make public (shareable)</label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Create</button>
+                    <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('createModal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- My Playlists -->
+    <h2>My Playlists</h2>
+    <div class="playlist-grid" th:if="${not #lists.isEmpty(playlists)}">
+        <div class="playlist-card" th:each="pl : ${playlists}">
+            <div class="playlist-privacy">
+                <span th:text="${pl.isPublic() ? '🌍 Public' : '🔒 Private'}">Private</span>
+            </div>
+            <h4 th:text="${pl.name}">Playlist Name</h4>
+            <p th:text="${pl.description}">Description</p>
+            <p class="playlist-count" th:text="${#lists.size(pl.contentItems)} + ' items'">0 items</p>
+            <div class="card-actions">
+                <a th:href="@{/playlist/{id}(id=${pl.id})}" class="btn-primary">Open</a>
+                <form th:action="@{/playlist/{id}/delete(id=${pl.id})}" method="post" style="display:inline">
+                    <button type="submit" class="btn-danger"
+                            onclick="return confirm('Delete this playlist?')">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div th:if="${#lists.isEmpty(playlists)}" class="empty-state">
+        <p>No playlists yet. Create one to start curating your library!</p>
+    </div>
+
+    <!-- Public Playlists -->
+    <h2>Shared Public Playlists</h2>
+    <div class="playlist-grid" th:if="${not #lists.isEmpty(publicPlaylists)}">
+        <div class="playlist-card playlist-card-public" th:each="pl : ${publicPlaylists}">
+            <div class="playlist-privacy">🌍 Public</div>
+            <h4 th:text="${pl.name}">Playlist Name</h4>
+            <p th:text="${pl.description}">Description</p>
+            <p class="playlist-owner">By: <span th:text="${pl.owner.username}">user</span></p>
+            <p class="playlist-count" th:text="${#lists.size(pl.contentItems)} + ' items'">0 items</p>
+            <a th:href="@{/playlist/{id}(id=${pl.id})}" class="btn-secondary">View</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

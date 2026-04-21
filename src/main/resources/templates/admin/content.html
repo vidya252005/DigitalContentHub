@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Manage Content – ContentHub Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/admin}">🎬 ContentHub Admin</a></div>
+    <div class="nav-links">
+        <a th:href="@{/admin}">Dashboard</a>
+        <a th:href="@{/admin/content}" class="active">Content</a>
+        <a th:href="@{/admin/content/upload}" class="btn-primary">+ Upload</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+    <div class="page-header-row">
+        <h1>Content Library</h1>
+        <a th:href="@{/admin/content/upload}" class="btn-primary">+ Upload New Content</a>
+    </div>
+
+    <!-- Filter tabs by plan -->
+    <div class="filter-tabs">
+        <a th:href="@{/admin/content}"                    th:classappend="${planFilter == null} ? 'active':''">All</a>
+        <a th:href="@{/admin/content(plan='FREE')}"      th:classappend="${planFilter == 'FREE'}   ? 'active':''">🔓 Free</a>
+        <a th:href="@{/admin/content(plan='MONTHLY')}"    th:classappend="${planFilter == 'MONTHLY'} ? 'active':''">⭐ Monthly+</a>
+        <a th:href="@{/admin/content(plan='YEARLY')}"     th:classappend="${planFilter == 'YEARLY'}  ? 'active':''">💎 Yearly Only</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Title</th><th>Type</th><th>Genre</th><th>Creator</th>
+                <th>Required Plan</th><th>Views</th><th>Rating</th><th>Status</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${contents}" th:classappend="${!item.available} ? 'row-inactive':''">
+                <td><strong th:text="${item.title}">Title</strong></td>
+                <td th:text="${item.contentType}">Type</td>
+                <td th:text="${item.genre}">Genre</td>
+                <td th:text="${item.creator}">Creator</td>
+                <td>
+                    <span th:text="${item.requiredPlanLabel}"
+                          th:class="${'plan-tier-badge ' + item.requiredPlanColor}">Free</span>
+                </td>
+                <td th:text="${item.viewCount}">0</td>
+                <td th:text="'⭐ ' + ${item.rating}">4.5</td>
+                <td>
+                    <span th:text="${item.available ? 'Live' : 'Hidden'}"
+                          th:class="${item.available ? 'badge badge-active' : 'badge badge-expired'}">Live</span>
+                </td>
+                <td class="action-col">
+                    <a th:href="@{/admin/content/{id}/edit(id=${item.id})}" class="btn-edit">✏ Edit</a>
+                    <form th:action="@{/admin/content/{id}/toggle(id=${item.id})}" method="post" style="display:inline">
+                        <button type="submit"
+                                th:text="${item.available ? 'Hide' : 'Show'}"
+                                th:class="${item.available ? 'btn-danger' : 'btn-secondary'}">Hide</button>
+                    </form>
+                    <form th:action="@{/admin/content/{id}/delete(id=${item.id})}" method="post" style="display:inline">
+                        <button type="submit" class="btn-danger"
+                                onclick="return confirm('Permanently delete this content?')">🗑</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

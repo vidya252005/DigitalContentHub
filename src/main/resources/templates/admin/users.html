@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Manage Users – ContentHub Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/admin}">Admin Dashboard</a>
+        <a th:href="@{/admin/content}">Content</a>
+        <a th:href="@{/admin/users}" class="active">Users</a>
+        <a th:href="@{/admin/curators/add}" class="btn-primary">+ Add Curator</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <h1>User Management</h1>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th><th>Username</th><th>Email</th><th>Role</th>
+                <th>Subscription</th><th>Status</th><th>Joined</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${users}" th:classappend="${!u.active} ? 'row-inactive' : ''">
+                <td th:text="${u.id}">1</td>
+                <td th:text="${u.username}">username</td>
+                <td th:text="${u.email}">email</td>
+                <td>
+                    <span class="role-badge"
+                          th:classappend="${u.role.name() == 'ADMIN'} ? 'role-admin' :
+                                          (${u.role.name() == 'CURATOR'} ? 'role-curator' : 'role-subscriber')"
+                          th:text="${u.role}">ROLE</span>
+                </td>
+                <td>
+                    <span th:if="${u.subscription != null and u.subscription.active}"
+                          class="badge badge-active"
+                          th:text="${u.subscription.planType}">MONTHLY</span>
+                    <span th:if="${u.subscription == null or !u.subscription.active}"
+                          class="badge badge-expired">None</span>
+                </td>
+                <td>
+                    <span th:text="${u.active ? 'Active' : 'Banned'}"
+                          th:class="${u.active ? 'badge badge-active' : 'badge badge-expired'}">Active</span>
+                </td>
+                <td th:text="${#temporals.format(u.createdAt, 'dd MMM yyyy')}">Date</td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/toggle(id=${u.id})}" method="post"
+                          style="display:inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" th:text="${u.active ? 'Ban' : 'Unban'}"
+                                th:class="${u.active ? 'btn-danger' : 'btn-secondary'}"
+                                th:onclick="${u.active ? 'return confirm(\'Ban this user?\')' : ''}">
+                            Toggle
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
