@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Subscription – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">Catalog</a>
+        <a th:href="@{/subscription/plans}">Change Plan</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <h1>My Subscription</h1>
+
+    <div th:if="${subscription}" class="status-card">
+        <div class="status-header">
+            <span class="badge badge-active" th:if="${subscription.valid}">✓ ACTIVE</span>
+            <span class="badge badge-expired" th:unless="${subscription.valid}">✗ EXPIRED</span>
+            <h2 th:text="${subscription.planType + ' Plan'}">Plan</h2>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-item">
+                <label>Start Date</label>
+                <strong th:text="${subscription.startDate}">Date</strong>
+            </div>
+            <div class="status-item">
+                <label>Expiry Date</label>
+                <strong th:text="${subscription.endDate}">Date</strong>
+            </div>
+            <div class="status-item">
+                <label>Days Remaining</label>
+                <strong th:text="${subscription.daysRemaining + ' days'}">30</strong>
+            </div>
+            <div class="status-item">
+                <label>Payment Status</label>
+                <strong th:text="${subscription.paymentStatus}">PAID</strong>
+            </div>
+        </div>
+
+        <div th:if="${planDetails}" class="plan-features-box">
+            <h3>Your Plan Includes</h3>
+            <ul>
+                <li th:each="f : ${#strings.arraySplit(planDetails.featureList, ';')}"
+                    th:text="${#strings.trim(f)}">Feature</li>
+            </ul>
+            <div class="plan-flags">
+                <span th:classappend="${planDetails.supportsHDStreaming()} ? 'flag-yes' : 'flag-no'"
+                      th:text="${planDetails.supportsHDStreaming()} ? '✓ HD Streaming' : '✗ HD Streaming'"></span>
+                <span th:classappend="${planDetails.supportsOfflineDownload()} ? 'flag-yes' : 'flag-no'"
+                      th:text="${planDetails.supportsOfflineDownload()} ? '✓ Offline Downloads' : '✗ Offline Downloads'"></span>
+                <span class="flag-yes" th:text="'✓ Up to ' + ${planDetails.maxDevices} + ' device(s)'"></span>
+            </div>
+        </div>
+
+        <div class="status-actions">
+            <a th:href="@{/subscription/plans}" class="btn-primary">Change / Upgrade Plan</a>
+            <div class="renew-section">
+                <form th:action="@{/subscription/renew}" method="post">
+                    <select name="paymentMethod" class="payment-select">
+                        <option value="CREDIT_CARD">Credit Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="NET_BANKING">Net Banking</option>
+                    </select>
+                    <button type="submit" class="btn-secondary">Renew Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:unless="${subscription}" class="empty-state">
+        <h2>No Active Subscription</h2>
+        <p>Subscribe to access premium movies, music and eBooks.</p>
+        <a th:href="@{/subscription/plans}" class="btn-primary">View Plans</a>
+    </div>
+</div>
+</body>
+</html>
