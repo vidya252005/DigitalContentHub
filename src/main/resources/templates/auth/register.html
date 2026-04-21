@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Register – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-body">
+<div class="auth-card wide-card">
+    <div class="auth-logo">🎬 ContentHub</div>
+    <h2>Create Account</h2>
+    <p class="auth-sub">Get started with ContentHub</p>
+
+    <!-- Role selector -->
+    <div class="role-selector" id="roleSelector">
+        <p class="role-prompt">I want to register as a...</p>
+        <div class="role-cards">
+            <div class="role-card" onclick="selectRole('user')">
+                <div class="role-icon">👤</div>
+                <div class="role-label">User</div>
+                <div class="role-desc">Subscribe &amp; enjoy content</div>
+            </div>
+            <div class="role-card" onclick="selectRole('admin')">
+                <div class="role-icon">🛠</div>
+                <div class="role-label">Admin</div>
+                <div class="role-desc">Manage the platform</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration form (hidden until role selected) -->
+    <div id="registerForm" style="display:none">
+        <div class="selected-role-banner" id="roleBanner"></div>
+
+        <form th:action="@{/auth/register}" method="post" th:object="${registerDTO}">
+            <!-- Hidden field carries the chosen role to the controller -->
+            <input type="hidden" name="role" id="roleInput" value="SUBSCRIBER"/>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" th:field="*{username}" placeholder="Choose a username" required autofocus/>
+                <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" th:field="*{email}" placeholder="your@email.com" required/>
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" th:field="*{password}" placeholder="At least 6 characters" required/>
+                <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" th:field="*{confirmPassword}" placeholder="Repeat password" required/>
+                <span class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
+            </div>
+            <button type="submit" class="btn-primary btn-full">Create Account</button>
+        </form>
+        <button class="btn-text" onclick="resetRole()">← Change role</button>
+    </div>
+
+    <div class="auth-footer" id="authFooter">
+        <p>Already have an account? <a th:href="@{/auth/login}">Sign in</a></p>
+    </div>
+</div>
+<script>
+function selectRole(role) {
+    document.getElementById('roleSelector').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    const banner = document.getElementById('roleBanner');
+    if (role === 'admin') {
+        document.getElementById('roleInput').value = 'ADMIN';
+        banner.innerHTML = '🛠 Registering as <strong>Administrator</strong>';
+        banner.className = 'selected-role-banner role-admin-banner';
+        document.getElementById('authFooter').style.display = 'none';
+    } else {
+        document.getElementById('roleInput').value = 'SUBSCRIBER';
+        banner.innerHTML = '👤 Registering as <strong>User</strong>';
+        banner.className = 'selected-role-banner role-user-banner';
+    }
+}
+function resetRole() {
+    document.getElementById('roleSelector').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('authFooter').style.display = 'block';
+}
+</script>
+</body>
+</html>
