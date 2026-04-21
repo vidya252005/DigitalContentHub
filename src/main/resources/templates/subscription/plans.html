@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Subscription Plans – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">Catalog</a>
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/subscription/status}" th:if="${currentSubscription}">My Subscription</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+    <h1 class="page-title">Subscription Plans</h1>
+    <p class="page-sub">Choose the plan that works best for you</p>
+
+    <!-- Active plan banner -->
+    <div th:if="${currentSubscription}" class="active-plan-banner">
+        <span class="badge badge-active">✓ ACTIVE</span>
+        You are on the <strong th:text="${currentSubscription.planType}">MONTHLY</strong> plan,
+        valid until <strong th:text="${currentSubscription.endDate}">date</strong>.
+        To switch plans, simply select a new one below.
+    </div>
+
+    <div class="plans-grid">
+
+        <!-- FREE PLAN -->
+        <div class="plan-card"
+             th:classappend="${currentSubscription != null and currentSubscription.planType == 'FREE'} ? ' plan-current' : ''">
+            <div class="plan-current-badge"
+                 th:if="${currentSubscription != null and currentSubscription.planType == 'FREE'}">
+                Current Plan
+            </div>
+            <div class="plan-header">
+                <h3>Free</h3>
+                <div class="plan-price">₹0<span class="period">/month</span></div>
+            </div>
+            <ul class="plan-features">
+                <li>Access to free content</li>
+                <li>SD Streaming</li>
+                <li>1 device</li>
+            </ul>
+            <div class="btn-full btn-secondary" style="padding: 10px; text-align: center; opacity: 0.7;">
+                ✓ No payment required
+            </div>
+        </div>
+
+        <!-- MONTHLY PREMIUM -->
+        <div class="plan-card plan-featured"
+             th:classappend="${currentSubscription != null and currentSubscription.planType == 'MONTHLY'} ? ' plan-current' : ''">
+            <div class="plan-badge"
+                 th:if="${currentSubscription == null or currentSubscription.planType != 'MONTHLY'}">
+                MOST POPULAR
+            </div>
+            <div class="plan-current-badge"
+                 th:if="${currentSubscription != null and currentSubscription.planType == 'MONTHLY'}">
+                ✓ Current Plan
+            </div>
+            <div class="plan-header">
+                <h3>Monthly Premium</h3>
+                <div class="plan-price">₹830<span class="period">/month</span></div>
+            </div>
+            <ul class="plan-features">
+                <li>All free content</li>
+                <li>HD Streaming</li>
+                <li>All premium content</li>
+                <li>2 devices</li>
+            </ul>
+            <form th:action="@{/subscription/checkout}" method="post">
+                <input type="hidden" name="planType" value="MONTHLY"/>
+                <button type="submit" class="btn-primary btn-full"
+                        th:text="${currentSubscription != null and currentSubscription.planType == 'MONTHLY'} ? 'Renew Monthly' : 'Subscribe Monthly'">
+                    Subscribe Monthly
+                </button>
+            </form>
+        </div>
+
+        <!-- YEARLY PREMIUM -->
+        <div class="plan-card plan-yearly"
+             th:classappend="${currentSubscription != null and currentSubscription.planType == 'YEARLY'} ? ' plan-current' : ''">
+            <div class="plan-badge badge-gold"
+                 th:if="${currentSubscription == null or currentSubscription.planType != 'YEARLY'}">
+                BEST VALUE
+            </div>
+            <div class="plan-current-badge plan-current-badge-gold"
+                 th:if="${currentSubscription != null and currentSubscription.planType == 'YEARLY'}">
+                ✓ Current Plan
+            </div>
+            <div class="plan-header">
+                <h3>Yearly Premium</h3>
+                <div class="plan-price">₹664<span class="period">/month</span></div>
+                <p class="plan-savings">Save 20%! Billed as ₹7,970/year</p>
+            </div>
+            <ul class="plan-features">
+                <li>All free content</li>
+                <li>HD Streaming</li>
+                <li>All premium content</li>
+                <li>Offline Downloads</li>
+                <li>2 devices</li>
+                <li>20% yearly discount</li>
+            </ul>
+            <form th:action="@{/subscription/checkout}" method="post">
+                <input type="hidden" name="planType" value="YEARLY"/>
+                <button type="submit" class="btn-primary btn-full btn-gold"
+                        th:text="${currentSubscription != null and currentSubscription.planType == 'YEARLY'} ? 'Renew Yearly' : 'Subscribe Yearly'">
+                    Subscribe Yearly
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <p class="plan-note">All plans include a 7-day free trial for new subscribers. Cancel anytime.</p>
+</div>
+</body>
+</html>
