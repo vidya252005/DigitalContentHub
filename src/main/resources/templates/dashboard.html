@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Dashboard – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">Catalog</a>
+        <a th:href="@{/playlist}" sec:authorize="hasRole('SUBSCRIBER')">My Library</a>
+        <a th:href="@{/subscription/status}" sec:authorize="hasRole('SUBSCRIBER')">Subscription</a>
+        <a th:href="@{/content/add}" sec:authorize="hasAnyRole('CURATOR','ADMIN')">Add Content</a>
+        <a th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">Admin Panel</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <h1>Welcome back, <span th:text="${user.username}">User</span>! 👋</h1>
+        <p th:text="'Role: ' + ${user.role}">Role</p>
+    </div>
+
+    <!-- Subscription Status Card -->
+    <div class="card subscription-card" th:if="${subscription}">
+        <h3>📋 Your Subscription</h3>
+        <div class="sub-details">
+            <span class="badge badge-active">ACTIVE</span>
+            <strong th:text="${subscription.planType}">MONTHLY</strong> Plan &nbsp;|&nbsp;
+            Expires: <strong th:text="${subscription.endDate}">Date</strong>
+        </div>
+    </div>
+    <div class="card cta-card" th:unless="${subscription}" sec:authorize="hasRole('SUBSCRIBER')">
+        <h3>🔓 Unlock Premium Content</h3>
+        <p>Subscribe to access thousands of movies, music tracks and eBooks.</p>
+        <a th:href="@{/subscription/plans}" class="btn-primary">View Plans</a>
+    </div>
+
+    <!-- Trending Content -->
+    <h2 class="section-title">🔥 Trending Now</h2>
+    <div class="content-grid">
+        <div class="content-card" th:each="item : ${trending}">
+            <div class="content-type-badge" th:text="${item.contentType}">MOVIE</div>
+            <div th:if="${item.isPremium()}" class="premium-badge">PREMIUM</div>
+            <h4 th:text="${item.title}">Title</h4>
+            <p class="content-meta">
+                <span th:text="${item.genre}">Genre</span> &nbsp;·&nbsp;
+                <span th:text="${item.creator}">Creator</span>
+            </p>
+            <p class="view-count">👁 <span th:text="${item.viewCount}">0</span> views</p>
+            <div class="card-actions">
+                <a th:href="@{/content/{id}/stream(id=${item.id})}" class="btn-primary">▶ Play</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <a th:href="@{/content}" class="btn-secondary">Browse Full Catalog →</a>
+    </div>
+</div>
+</body>
+</html>

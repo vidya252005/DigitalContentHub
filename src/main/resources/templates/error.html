@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Error – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-body">
+<div class="auth-card">
+    <div class="auth-logo">⚠️</div>
+    <h2>Something went wrong</h2>
+    <p class="auth-sub" th:text="${errorMessage}">An error occurred.</p>
+    <div class="auth-footer">
+        <a th:href="@{/dashboard}" class="btn-primary">Go to Dashboard</a>
+        &nbsp;
+        <a th:href="@{/content}" class="btn-secondary">Browse Catalog</a>
+    </div>
+</div>
+</body>
+</html>

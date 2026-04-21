@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Digital Content Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <a th:href="@{/dashboard}">🎬 ContentHub</a>
+    </div>
+    <div class="nav-links" sec:authorize="isAuthenticated()">
+        <a th:href="@{/content}">Catalog</a>
+        <a th:href="@{/playlist}" sec:authorize="hasRole('SUBSCRIBER')">My Library</a>
+        <a th:href="@{/subscription/status}" sec:authorize="hasRole('SUBSCRIBER')">Subscription</a>
+        <a th:href="@{/curator}" sec:authorize="hasAnyRole('CURATOR','ADMIN')">Curator Panel</a>
+        <a th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+    <div class="nav-links" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/auth/login}">Login</a>
+        <a th:href="@{/auth/register}" class="btn-primary">Register</a>
+    </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+<div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+<div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+<!-- PAGE CONTENT (replaced by each template) -->
+<div class="container" th:fragment="content">
+    <!-- child content here -->
+</div>
+
+</body>
+</html>
