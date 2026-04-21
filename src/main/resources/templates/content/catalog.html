@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Content Catalog – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}" class="active">Catalog</a>
+        <a th:href="@{/playlist}"            sec:authorize="hasRole('SUBSCRIBER')">My Library</a>
+        <a th:href="@{/subscription/status}" sec:authorize="hasRole('SUBSCRIBER')">Subscription</a>
+        <a th:href="@{/admin/content}"        sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+    <h1>Content Catalog</h1>
+
+    <!-- Search -->
+    <form th:action="@{/content}" method="get" class="search-form">
+        <input type="text" name="search" th:value="${searchQuery}"
+               placeholder="Search by title, creator, genre..."/>
+        <button type="submit" class="btn-primary">Search</button>
+        <a th:href="@{/content}" class="btn-secondary">Clear</a>
+    </form>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+        <a th:href="@{/content}"
+           th:classappend="${activeType == null and planFilter == null} ? 'active' : ''">All</a>
+        <a th:each="type : ${contentTypes}"
+           th:href="@{/content(type=${type})}"
+           th:text="${type}"
+           th:classappend="${activeType == type.name()} ? 'active' : ''">TYPE</a>
+        <a th:href="@{/content(plan='FREE')}"
+           th:classappend="${planFilter == 'FREE'} ? 'active' : ''">🆓 Free</a>
+        <a th:href="@{/content(plan='MONTHLY')}"
+           th:classappend="${planFilter == 'MONTHLY'} ? 'active' : ''">⭐ Monthly+</a>
+        <a th:href="@{/content(plan='YEARLY')}"
+           th:classappend="${planFilter == 'YEARLY'} ? 'active' : ''">💎 Yearly</a>
+    </div>
+
+    <!-- Plan legend for subscribers -->
+    <div sec:authorize="hasRole('SUBSCRIBER')">
+        <div class="plan-legend" th:if="${userSubscription != null}">
+            <span>Your plan:</span>
+            <strong th:text="${userSubscription.planType}">MONTHLY</strong>
+            <span class="legend-sep"> · </span>
+            <span class="plan-tier-badge plan-free">🆓 Free = accessible</span>
+            <span class="plan-tier-badge plan-monthly"
+                  th:if="${userSubscription.planType == 'MONTHLY' or userSubscription.planType == 'YEARLY'}">
+                ⭐ Monthly+ = accessible
+            </span>
+            <span class="plan-tier-badge plan-yearly-badge"
+                  th:if="${userSubscription.planType == 'YEARLY'}">
+                💎 Yearly = accessible
+            </span>
+            <a th:href="@{/subscription/plans}" style="font-size:0.8rem;margin-left:0.75rem">Upgrade →</a>
+        </div>
+        <div class="plan-legend" th:unless="${userSubscription != null}">
+            <span>No active subscription — </span>
+            <a th:href="@{/subscription/plans}">Subscribe to unlock premium content →</a>
+        </div>
+    </div>
+
+    <!-- Add-to-Playlist modal -->
+    <div id="playlistModal" class="modal" style="display:none" sec:authorize="hasRole('SUBSCRIBER')">
+        <div class="modal-card">
+            <h3>Add to Playlist</h3>
+            <p id="modalContentTitle" style="color:#aaa;margin-bottom:1rem"></p>
+            <div id="playlistList"><p style="color:#888">Loading...</p></div>
+            <div style="margin-top:1rem;display:flex;gap:0.5rem">
+                <a th:href="@{/playlist}" class="btn-secondary" style="font-size:0.85rem">Manage Playlists →</a>
+                <button class="btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid" th:if="${not #lists.isEmpty(contents)}">
+        <div class="content-card" th:each="item : ${contents}">
+
+            <!-- Type + Plan badges -->
+            <div class="card-top-row">
+                <span class="content-type-badge" th:text="${item.contentType}">MOVIE</span>
+                <span th:text="${item.requiredPlanLabel}"
+                      th:class="'plan-tier-badge ' + ${item.requiredPlanColor}">Free</span>
+            </div>
+
+            <h4 th:text="${item.title}">Title</h4>
+            <p class="content-meta">
+                <span th:text="${item.genre}">Genre</span> &nbsp;·&nbsp;
+                <span th:text="${item.creator}">Creator</span>
+            </p>
+            <p class="content-desc" th:text="${#strings.abbreviate(item.description, 80)}">Desc</p>
+            <div class="rating">
+                ⭐ <span th:text="${item.rating}">4.5</span>
+                &nbsp;·&nbsp; 👁 <span th:text="${item.viewCount}">0</span>
+            </div>
+
+            <!-- Access hint for subscribers -->
+            <div sec:authorize="hasRole('SUBSCRIBER')">
+                <!-- MONTHLY content, user has no sub or FREE only -->
+                <span class="upgrade-hint"
+                      th:if="${item.requiredPlan.name() == 'MONTHLY'
+                              and (userSubscription == null
+                                   or (userSubscription.planType != 'MONTHLY'
+                                       and userSubscription.planType != 'YEARLY'))}">
+                    🔒 Needs Monthly or Yearly plan
+                </span>
+                <!-- YEARLY content, user doesn't have yearly -->
+                <span class="upgrade-hint"
+                      th:if="${item.requiredPlan.name() == 'YEARLY'
+                              and (userSubscription == null
+                                   or userSubscription.planType != 'YEARLY')}">
+                    💎 Exclusive to Yearly plan
+                </span>
+            </div>
+
+            <div class="card-actions">
+                <a th:href="@{/content/{id}/stream(id=${item.id})}" class="btn-primary">▶ Play</a>
+                <button sec:authorize="hasRole('SUBSCRIBER')"
+                        class="btn-playlist"
+                        th:attr="data-id=${item.id},data-title=${item.title}"
+                        onclick="openPlaylistModal(this)">+ Library</button>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(contents)}" class="empty-state">
+        <p>No content found. Try a different search or filter.</p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+const userPlaylists = /*[[${userPlaylists}]]*/ [];
+
+function openPlaylistModal(btn) {
+    const contentId    = btn.getAttribute('data-id');
+    const contentTitle = btn.getAttribute('data-title');
+    document.getElementById('modalContentTitle').textContent = '"' + contentTitle + '"';
+    const list = document.getElementById('playlistList');
+    if (!userPlaylists || userPlaylists.length === 0) {
+        list.innerHTML = '<p style="color:#aaa">No playlists yet. <a href="/playlist" style="color:#7c6af7">Create one →</a></p>';
+    } else {
+        list.innerHTML = userPlaylists.map(pl =>
+            `<form action="/playlist/${pl.id}/add/${contentId}" method="post" style="margin-bottom:0.5rem">
+                <button type="submit" class="btn-secondary btn-full" style="text-align:left">
+                    ${pl.public ? '🌍' : '🔒'} ${pl.name}
+                </button>
+             </form>`
+        ).join('');
+    }
+    document.getElementById('playlistModal').style.display = 'flex';
+}
+function closeModal() {
+    document.getElementById('playlistModal').style.display = 'none';
+}
+</script>
+</body>
+</html>

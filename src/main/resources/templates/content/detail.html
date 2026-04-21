@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${content.title} + ' – ContentHub'">Content</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">← Catalog</a>
+        <a th:href="@{/playlist}" sec:authorize="hasRole('SUBSCRIBER')">My Library</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<!-- Add to playlist modal -->
+<div id="playlistModal" class="modal" style="display:none" sec:authorize="hasRole('SUBSCRIBER')">
+    <div class="modal-card">
+        <h3>Add to Playlist</h3>
+        <p style="color:#aaa;margin-bottom:1rem" th:text="'\"' + ${content.title} + '\"'"></p>
+        <div th:if="${userPlaylists != null and not #lists.isEmpty(userPlaylists)}">
+            <form th:each="pl : ${userPlaylists}"
+                  th:action="@{/playlist/{pid}/add/{cid}(pid=${pl.id},cid=${content.id})}"
+                  method="post" style="margin-bottom:0.5rem">
+                <button type="submit" class="btn-secondary btn-full" style="text-align:left">
+                    <span th:text="${pl.isPublic()} ? '🌍' : '🔒'"></span>
+                    <span th:text="${pl.name}">Playlist</span>
+                </button>
+            </form>
+        </div>
+        <div th:if="${userPlaylists == null or #lists.isEmpty(userPlaylists)}">
+            <p style="color:#888">No playlists yet.
+                <a th:href="@{/playlist}" style="color:#7c6af7">Create one →</a>
+            </p>
+        </div>
+        <button class="btn-secondary" onclick="document.getElementById('playlistModal').style.display='none'"
+                style="margin-top:1rem">Close</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="detail-card">
+        <div class="detail-header">
+            <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem">
+                <div class="content-type-badge large" th:text="${content.contentType}">MOVIE</div>
+                <div th:if="${content.isPremium()}" class="premium-badge large">🔒 PREMIUM</div>
+            </div>
+            <h1 th:text="${content.title}">Title</h1>
+            <p class="meta-row">
+                <strong>Genre:</strong> <span th:text="${content.genre}">Genre</span> &nbsp;·&nbsp;
+                <strong>Creator:</strong> <span th:text="${content.creator}">Creator</span> &nbsp;·&nbsp;
+                ⭐ <span th:text="${content.rating}">4.5</span> &nbsp;·&nbsp;
+                👁 <span th:text="${content.viewCount}">0</span> views
+            </p>
+        </div>
+
+        <p class="detail-desc" th:text="${content.description}">Description</p>
+
+        <div class="detail-actions">
+            <a th:href="@{/content/{id}/stream(id=${content.id})}" class="btn-primary btn-large">▶ Play Now</a>
+
+            <!-- Add to playlist button (subscriber only) -->
+            <button sec:authorize="hasRole('SUBSCRIBER')"
+                    class="btn-secondary btn-large"
+                    onclick="document.getElementById('playlistModal').style.display='flex'">
+                + Add to Library
+            </button>
+
+            <a th:href="@{/content}" class="btn-secondary">← Catalog</a>
+
+            <span sec:authorize="hasAnyRole('CURATOR','ADMIN')">
+                <a th:href="@{/content/{id}/edit(id=${content.id})}" class="btn-edit">✏ Edit</a>
+                <form th:action="@{/content/{id}/delete(id=${content.id})}" method="post" style="display:inline">
+                    <button type="submit" class="btn-danger"
+                            onclick="return confirm('Remove this content?')">🗑 Remove</button>
+                </form>
+            </span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

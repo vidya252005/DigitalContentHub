@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${content.title} + ' – ContentHub'">Streaming</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a th:href="@{/dashboard}">🎬 ContentHub</a></div>
+    <div class="nav-links">
+        <a th:href="@{/content}">← Catalog</a>
+        <a th:href="@{/playlist}">My Library</a>
+        <a th:href="@{/auth/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+<div class="container">
+    <div class="stream-card">
+        <div class="stream-header">
+            <span class="badge badge-active">▶ NOW PLAYING</span>
+            <h1 th:text="${content.title}">Title</h1>
+            <p class="meta-row">
+                <span th:text="${content.contentType}">Type</span> &nbsp;·&nbsp;
+                <span th:text="${content.genre}">Genre</span> &nbsp;·&nbsp;
+                <span th:text="${content.creator}">Creator</span>
+            </p>
+        </div>
+
+        <!-- Player UI -->
+        <div class="player-mock">
+            <div class="player-icon">
+                <span th:switch="${content.contentType.name()}">
+                    <span th:case="'MOVIE'">🎬</span>
+                    <span th:case="'MUSIC'">🎵</span>
+                    <span th:case="'EBOOK'">📖</span>
+                    <span th:case="*">▶</span>
+                </span>
+            </div>
+            <p class="player-title" th:text="${content.title}">Title</p>
+            <div class="player-bar">
+                <div class="player-progress" id="progress"></div>
+            </div>
+            <p class="player-time" id="timeDisplay">0:00 / 3:45</p>
+            <div class="player-controls">
+                <button onclick="seekBack()">⏮</button>
+                <button class="play-btn" id="playBtn" onclick="togglePlay()">⏸</button>
+                <button onclick="seekForward()">⏭</button>
+                <button onclick="toggleMute()">🔊</button>
+            </div>
+        </div>
+
+        <div class="stream-actions">
+            <a th:href="@{/playlist}" class="btn-secondary">+ Add to Library</a>
+        </div>
+    </div>
+</div>
+<script>
+    let playing = true, progress = 0, muted = false;
+    const interval = setInterval(() => {
+        if (!playing) return;
+        progress = Math.min(progress + 0.4, 100);
+        document.getElementById('progress').style.width = progress + '%';
+        const total = 225, current = Math.round(total * progress / 100);
+        const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+        document.getElementById('timeDisplay').textContent = fmt(current) + ' / ' + fmt(total);
+        if (progress >= 100) clearInterval(interval);
+    }, 1000);
+    function togglePlay() {
+        playing = !playing;
+        document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+    }
+    function seekForward() { progress = Math.min(progress + 10, 100); }
+    function seekBack()    { progress = Math.max(progress - 10, 0); }
+    function toggleMute()  { muted = !muted; }
+</script>
+</body>
+</html>
