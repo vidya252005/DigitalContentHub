@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Login – ContentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-body">
+<div class="auth-card wide-card">
+    <div class="auth-logo">🎬 ContentHub</div>
+    <h2>Welcome Back</h2>
+    <p class="auth-sub">Sign in to continue</p>
+
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Role selector -->
+    <div class="role-selector" id="roleSelector">
+        <p class="role-prompt">I am signing in as a...</p>
+        <div class="role-cards">
+            <div class="role-card" onclick="selectRole('user')">
+                <div class="role-icon">👤</div>
+                <div class="role-label">User</div>
+                <div class="role-desc">Browse &amp; stream content</div>
+            </div>
+            <div class="role-card" onclick="selectRole('admin')">
+                <div class="role-icon">🛠</div>
+                <div class="role-label">Admin</div>
+                <div class="role-desc">Manage platform &amp; content</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login form (hidden until role selected) -->
+    <div id="loginForm" style="display:none">
+        <div class="selected-role-banner" id="roleBanner"></div>
+        <form th:action="@{/auth/login}" method="post">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" id="usernameInput" placeholder="Enter your username" required autofocus/>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required/>
+            </div>
+            <button type="submit" class="btn-primary btn-full" id="loginBtn">Sign In</button>
+        </form>
+        <button class="btn-text" onclick="resetRole()">← Change role</button>
+    </div>
+
+    <div class="auth-footer" id="authFooter">
+        <p>Don't have an account? <a th:href="@{/auth/register}">Register here</a></p>
+    </div>
+</div>
+
+<script>
+function selectRole(role) {
+    document.getElementById('roleSelector').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('authFooter').style.display = role === 'user' ? 'block' : 'none';
+
+    const banner = document.getElementById('roleBanner');
+    if (role === 'admin') {
+        banner.innerHTML = '🛠 Signing in as <strong>Administrator</strong>';
+        banner.className = 'selected-role-banner role-admin-banner';
+    } else {
+        banner.innerHTML = '👤 Signing in as <strong>User</strong>';
+        banner.className = 'selected-role-banner role-user-banner';
+    }
+    document.getElementById('usernameInput').focus();
+}
+
+function resetRole() {
+    document.getElementById('roleSelector').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('authFooter').style.display = 'block';
+}
+</script>
+</body>
+</html>
